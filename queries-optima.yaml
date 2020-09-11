@@ -1,0 +1,42 @@
+user_tables:
+        query: " SELECT valu, kpi_id as kpiid , start_time as startime , name, alert_active as alertactive FROM public.alerts_view; "
+
+        metrics:
+                        - name:
+                                        usage: "LABEL"
+                                        description: "Name of kpi"
+                        - kpiid:                                                                                                                                 
+                            usage: "LABEL"         
+                            description: "idno of kpi"
+
+                        - starttime:                                                                                                                                 
+                            usage: "LABEL"         
+                            description: "start time of the kpi calculation"
+                        - valu:
+                                usage: "GAUGE"
+                                description: "value of the kpi"
+                                
+                        - alertactive:
+
+                                usage: "LABEL"
+                                description: "true if kpi is read"
+
+model_correction : 
+  query: "select last_cloc_data.cloc,last_cloc_data.flow as cloc_flow ,last_rlin.iflw
+  from (select distinct on (cloc) cloc,strt,fsnd,cdat,flow from trafficstate 
+  where cloc is not null and cdat > (now() - '00:05:00'::interval)
+  and ((flow is not null)and (flow>0))
+  order by cloc, cdat desc ) as last_cloc_data,
+  (select rlin.link , rlin.fnod , rlin.iflw  , lkst.strt, lkst.fsnd from  rlin_tsys_tre_rltm as rlin, lkst  
+  where fore = 0  and rlin.link = lkst.link and rlin.fnod = lkst.fnod) as last_rlin 
+  where last_cloc_data.strt = last_rlin.strt and last_cloc_data.fsnd = last_rlin.fsnd
+  limit 2000"
+  metrics:
+          - cloc:
+                  usage: "LABEL"
+          - cloc_flow:
+                  usage: "GAUGE"
+          - iflw:
+                  usage: "GAUGE"
+
+

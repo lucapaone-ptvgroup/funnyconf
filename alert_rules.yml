@@ -1,0 +1,35 @@
+groups:
+- name: optima-group-alerts
+  rules:
+  - alert: HighRequestLatency
+    expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5
+    for: 10m
+    labels:
+      severity: page
+    annotations:
+      summary: High request latency
+  - alert: KpiAlerts
+    expr: user_tables_valu{alertactive="true"}
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      summary: kpi {{ $labels.name }} has value {{ $labels.value }}
+  - alert: DemandAlert
+    expr: (avg(model_correction_iflw) / avg(model_correction_cloc_flow)) > 1.1
+    for: 1m
+    labels:
+      severity: high
+    annotations:
+      summary: kpi {{ $value }}
+  - alert: GEHAlert
+    expr: avg(sqrt(2 * (model_correction_iflw - model_correction_cloc_flow) ^ 2 / (model_correction_iflw + model_correction_cloc_flow))) > 10
+    for: 5m
+    labels:
+      severity: high
+    annotations:
+      summary: kpi {{ $value }}
+
+
+
+
